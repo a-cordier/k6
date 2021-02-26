@@ -35,7 +35,17 @@ var (
 func Get(name string) interface{} {
 	mx.RLock()
 	defer mx.RUnlock()
-	return modules[name]
+	mod := modules[name]
+	if i, ok := mod.(PerTestModule); ok {
+		return i.NewVUModule()
+	}
+	return mod
+}
+
+// PerTestModule is a simple interface representing a per test module object that can be used to
+// make a per VU instance of the Module
+type PerTestModule interface {
+	NewVUModule() interface{}
 }
 
 // Register the given mod as a JavaScript module, available
