@@ -29,6 +29,7 @@ import (
 
 	"github.com/loadimpact/k6/lib/metrics"
 	"github.com/loadimpact/k6/stats"
+	"gopkg.in/guregu/null.v3"
 )
 
 // A Trail represents detailed information about an HTTP request.
@@ -53,6 +54,7 @@ type Trail struct {
 	ConnReused     bool
 	ConnRemoteAddr net.Addr
 
+	Failed null.Bool
 	// Populated by SaveSamples()
 	Tags    *stats.SampleTags
 	Samples []stats.Sample
