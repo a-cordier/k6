@@ -270,8 +270,8 @@ func MakeRequest(ctx context.Context, preq *ParsedHTTPRequest) (*Response, error
 	}
 
 	if preq.Auth == "digest" {
-		// In both digest and NTLM it is expected that the first response will be 401
-		// this does mean that a non 401 response will be marked as failed/unexpected
+		// Until digest authentication is refactored, the first response will always 
+		// be a 401 error, so we expect that.
 		if tracerTransport.responseCallback != nil {
 			originalResponseCallback := tracerTransport.responseCallback
 			tracerTransport.responseCallback = func(status int) bool {
@@ -281,6 +281,7 @@ func MakeRequest(ctx context.Context, preq *ParsedHTTPRequest) (*Response, error
 		}
 		transport = digestTransport{originalTransport: transport}
 	} else if preq.Auth == "ntlm" {
+		// The first response of NTLM auth may be a 401 error.
 		if tracerTransport.responseCallback != nil {
 			originalResponseCallback := tracerTransport.responseCallback
 			tracerTransport.responseCallback = func(status int) bool {

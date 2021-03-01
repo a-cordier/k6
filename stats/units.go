@@ -38,7 +38,7 @@ func ToD(d float64) time.Duration {
 	return time.Duration(d * float64(timeUnit))
 }
 
-// B formats a boolena for emission
+// B formats a boolean value for emission.
 func B(b bool) float64 {
 	if b {
 		return 1
