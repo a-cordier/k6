@@ -270,7 +270,7 @@ func MakeRequest(ctx context.Context, preq *ParsedHTTPRequest) (*Response, error
 	}
 
 	if preq.Auth == "digest" {
-		// Until digest authentication is refactored, the first response will always 
+		// Until digest authentication is refactored, the first response will always
 		// be a 401 error, so we expect that.
 		if tracerTransport.responseCallback != nil {
 			originalResponseCallback := tracerTransport.responseCallback
