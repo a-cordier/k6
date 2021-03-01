@@ -110,46 +110,39 @@ type SampleDataMap struct {
 // NewSampleFromTrail just creates a ready-to-send Sample instance
 // directly from a httpext.Trail.
 func NewSampleFromTrail(trail *httpext.Trail) *Sample {
-	if trail.Failed.Valid {
-		return &Sample{
-			Type:   DataTypeMap,
-			Metric: "http_req_li_all",
-			Data: &SampleDataMap{
-				Time: toMicroSecond(trail.GetTime()),
-				Tags: trail.GetTags(),
-				Values: map[string]float64{
-					metrics.HTTPReqs.Name:        1,
-					metrics.HTTPReqDuration.Name: stats.D(trail.Duration),
+	var values map[string]float64
+	if trail.Failed.Valid { // this is done so the adding of 1 map element doesn't reexpand the map as this is a hotpath
+		values = map[string]float64{
+			metrics.HTTPReqs.Name:              1,
+			metrics.HTTPReqDuration.Name:       stats.D(trail.Duration),
+			metrics.HTTPReqBlocked.Name:        stats.D(trail.Blocked),
+			metrics.HTTPReqConnecting.Name:     stats.D(trail.Connecting),
+			metrics.HTTPReqTLSHandshaking.Name: stats.D(trail.TLSHandshaking),
+			metrics.HTTPReqSending.Name:        stats.D(trail.Sending),
+			metrics.HTTPReqWaiting.Name:        stats.D(trail.Waiting),
+			metrics.HTTPReqReceiving.Name:      stats.D(trail.Receiving),
 
-					metrics.HTTPReqBlocked.Name:        stats.D(trail.Blocked),
-					metrics.HTTPReqConnecting.Name:     stats.D(trail.Connecting),
-					metrics.HTTPReqTLSHandshaking.Name: stats.D(trail.TLSHandshaking),
-					metrics.HTTPReqSending.Name:        stats.D(trail.Sending),
-					metrics.HTTPReqWaiting.Name:        stats.D(trail.Waiting),
-					metrics.HTTPReqReceiving.Name:      stats.D(trail.Receiving),
-					metrics.HTTPReqFailed.Name:         stats.B(trail.Failed.Bool),
-				},
-			},
+			metrics.HTTPReqFailed.Name: stats.B(trail.Failed.Bool),
+		}
+	} else {
+		values = map[string]float64{
+			metrics.HTTPReqs.Name:              1,
+			metrics.HTTPReqDuration.Name:       stats.D(trail.Duration),
+			metrics.HTTPReqBlocked.Name:        stats.D(trail.Blocked),
+			metrics.HTTPReqConnecting.Name:     stats.D(trail.Connecting),
+			metrics.HTTPReqTLSHandshaking.Name: stats.D(trail.TLSHandshaking),
+			metrics.HTTPReqSending.Name:        stats.D(trail.Sending),
+			metrics.HTTPReqWaiting.Name:        stats.D(trail.Waiting),
+			metrics.HTTPReqReceiving.Name:      stats.D(trail.Receiving),
 		}
 	}
-
 	return &Sample{
 		Type:   DataTypeMap,
 		Metric: "http_req_li_all",
 		Data: &SampleDataMap{
-			Time: toMicroSecond(trail.GetTime()),
-			Tags: trail.GetTags(),
-			Values: map[string]float64{
-				metrics.HTTPReqs.Name:        1,
-				metrics.HTTPReqDuration.Name: stats.D(trail.Duration),
-
-				metrics.HTTPReqBlocked.Name:        stats.D(trail.Blocked),
-				metrics.HTTPReqConnecting.Name:     stats.D(trail.Connecting),
-				metrics.HTTPReqTLSHandshaking.Name: stats.D(trail.TLSHandshaking),
-				metrics.HTTPReqSending.Name:        stats.D(trail.Sending),
-				metrics.HTTPReqWaiting.Name:        stats.D(trail.Waiting),
-				metrics.HTTPReqReceiving.Name:      stats.D(trail.Receiving),
-			},
+			Time:   toMicroSecond(trail.GetTime()),
+			Tags:   trail.GetTags(),
+			Values: values,
 		},
 	}
 }
